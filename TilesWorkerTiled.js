@@ -38,7 +38,7 @@ var loadTile = function(id, url){
 		         clearTimeout(timer);
 		      timer = setTimeout(function() {
 		    	  updateTileStructure(data.tiles, maxLevel, maxModels);
-		       }, 300);
+		       }, 150);
 		});
 		tilesLoading[id] = true;
 	}
@@ -53,16 +53,9 @@ var addModel = function(){
 			tilesToRemove = [];
 			self.postMessage({'cmd':'remove', 'ids':ids});
 		}else  if(tilesToRender.length > 0){
-
-			for(var i=0; i < 20; i++){
-				if(tilesToRender.length >0){
-					var tile = tilesToRender.shift();
-					tilesRendered.push(tile.id);
-					self.postMessage({'cmd':'add', 'data':tile});
-				}else{
-					break;
-				}
-			}
+			var tile = tilesToRender.shift();
+			tilesRendered.push(tile.id);
+			self.postMessage({'cmd':'add', 'data':tile});
 		}
 	}
 }
@@ -109,12 +102,11 @@ var collectCurrentTiles = function(){
 	         clearTimeout(timer);
 	      timer = setTimeout(function() {
 	    	  updateTileStructure(data.tiles, maxLevel, maxModels);
-	       }, 300);
+	       }, 150);
 	}
 }
 
 var updateTileStructure = function(){
-	console.log("updateTileStructure");
 	listenToRender = false;
     tilesToRemove = tilesRendered.slice();
     tilesRendered = [];
@@ -124,8 +116,6 @@ var updateTileStructure = function(){
         var tile = tiles[i];
 
         if(tile.level > maxLevel){
-			// collect models
-            //var models = rtree.search(tile.bbox);
 			var dataTiles = rtree.search(tile.bbox);
 			var models = [];
 			for(var j = 0; j < dataTiles.length; j++){
@@ -184,8 +174,8 @@ var updateTileStructure = function(){
 
 var timer;
 var tiles;
-var maxLevel = 15;
-var maxModels = 2000;
+var maxLevel = 16;
+var maxModels = 500;
 self.addEventListener('message', function(e) {
   var data = e.data;
   switch (data.cmd) {

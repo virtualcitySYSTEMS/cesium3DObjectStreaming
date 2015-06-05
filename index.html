@@ -10,10 +10,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
     <title>Cesium Viewer</title>
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
-    <link rel="stylesheet" href="Build/Cesium/Widgets/widgets.css" media="screen">
-    <link rel="stylesheet" href="CesiumViewer.css" media="screen">    
-    <script  src="Build/Cesium/Cesium.js"></script>
+    <link rel="stylesheet" href="../cesium/Build/Cesium/Widgets/widgets.css" media="screen">
+    <script  src="../cesium/Build/Cesium/Cesium.js"></script>
+
+	<style>
+		html {
+		    height: 100%;
+		}
+		
+		body {
+		    height: 100%;
+		    width: 100%;
+		    margin: 0;
+		    overflow: hidden;
+		    padding: 0;
+		    background: #000;
+		}
+		
+		.fullWindow {
+		    position: absolute;
+		    top: 0;
+		    left: 0;
+		    height: 100%;
+		    width: 100%;
+		    margin: 0;
+		    overflow: hidden;
+		    padding: 0;
+		    font-family: sans-serif;
+		}
+		
+		.loadingIndicator {
+		    display: block;
+		    position: absolute;
+		    top: 50%;
+		    left: 50%;
+		    margin-top: -33px;
+		    margin-left: -33px;
+		    width: 66px;
+		    height: 66px;
+		    background-position: center;
+		    background-repeat: no-repeat;
+		    background-image: url(Images/ajax-loader.gif);
+		}
 	
+	</style>	
               
 </head>
 <body style="background: #000;">
@@ -50,20 +90,21 @@ try {
 		"navigationInstructionsInitiallyVisible":true,
 		"scene3DOnly":true });		 
 } catch (exception) {
-	document.getElementById("loadingIndicator").style.display = 'none';
-    
+	document.getElementById("loadingIndicator").style.display = 'none';    
     console.error(exception);
     if (!document.querySelector('.cesium-widget-errorPanel')) {
         window.alert(exception);
     }
 }
 
-var kmlDataSources;
+
 var canvas =  viewer.scene.canvas;
+
 var scene = viewer.scene;
 
 
 var dataSources = {};
+
 var getTileStructure = function(){    	
 	var tilesToRender = scene.globe._surface._tilesToRender;
 	var tiles = [];
@@ -108,7 +149,7 @@ worker.addEventListener('message', function(e) {
 	    	var counter = 0;
 	    	for(var i = 0; i < ids.length; i++){
 	    		var id = ids[i];
-    	    	if(dataSources.hasOwnProperty(id)){    	    		
+    	    	if(dataSources.hasOwnProperty(id)){
     	    		scene.primitives.remove(dataSources[id]);
     	    		delete dataSources[id];
     	    		counter++
@@ -118,38 +159,18 @@ worker.addEventListener('message', function(e) {
 	  }    
 }, false);
    
-worker.postMessage({'cmd':'initialize', 'url':'cesium_data/collada.json'});
+worker.postMessage({'cmd':'initialize', 'url':'http://hosting.virtualcitysystems.de/demos/berlin/cesium/data/collada.json'});
 
 viewer.scene.postRender.addEventListener(function(scene, time)  {
 	worker.postMessage({'cmd':'postRender'});
 });
 
-var handler = new Cesium.ScreenSpaceEventHandler(canvas);
+var camera = viewer.camera;
+var removeEnd = camera.moveEnd.addEventListener(function() {
+	console.log("cameraListenerEnd");
+	worker.postMessage({'cmd':'tileStructureChanged', "tiles":getTileStructure(), "maxLevel":maxLevel, "maxModels":maxModels});
+});
 
-var oldValue;
-var oldModel;
-handler.setInputAction(function(position) {
-	var test = scene.pick(position.position);
-	if(test){
-		
-	}
-}, Cesium.ScreenSpaceEventType.LEFT_DOWN );
-	
-	
-handler.setInputAction(function(position) {
-	worker.postMessage({'cmd':'tileStructureChanged', "tiles":getTileStructure(), "maxLevel":maxLevel, "maxModels":maxModels});
-}, Cesium.ScreenSpaceEventType.LEFT_UP);
-handler.setInputAction(function(position) {
-	worker.postMessage({'cmd':'tileStructureChanged', "tiles":getTileStructure(), "maxLevel":maxLevel, "maxModels":maxModels});
-}, Cesium.ScreenSpaceEventType.RIGHT_UP);
-var timer;
-handler.setInputAction(function(position) {
-	worker.postMessage({'cmd':'tileStructureChanged', "tiles":getTileStructure(), "maxLevel":maxLevel, "maxModels":maxModels});
-}, Cesium.ScreenSpaceEventType.WHEEL);
-
-handler.setInputAction(function(position) {
-	worker.postMessage({'cmd':'tileStructureChanged', "tiles":getTileStructure(), "maxLevel":maxLevel, "maxModels":maxModels});
-}, Cesium.ScreenSpaceEventType.MIDDLE_UP);
 
 var showLoadError = function(name, error) {
     var title = 'An error occurred while loading the file: ' + name;
@@ -157,27 +178,33 @@ var showLoadError = function(name, error) {
     viewer.cesiumWidget.showErrorPanel(title, message, error);
 };
 
-    viewer.scene.frameState.creditDisplay.addDefaultCredit(new Cesium.Credit('EFRE', 'http://81.169.167.246/images/opendata/efre.png', 'http://www.berlin.de/sen/wirtschaft/gruenden-und-foerdern/europaeische-strukturfonds/'));
-	viewer.scene.frameState.creditDisplay.addDefaultCredit(new Cesium.Credit('EU', 'http://81.169.167.246/images/opendata/EU_efre_weiss.png', 'http://www.berlin.de/sen/wirtschaft/gruenden-und-foerdern/europaeische-strukturfonds/'));
-    viewer.scene.frameState.creditDisplay.addDefaultCredit(new Cesium.Credit('Im Auftrag der Senatsverwaltung für Wirtschaft, Technologie und Forschung, gefördert aus dem Europäischen Fonds für Regionale Entwicklung (EFRE).'));
+
+// add copyright information for berlin model
+viewer.scene.frameState.creditDisplay.addDefaultCredit(new Cesium.Credit('EFRE', 'http://81.169.167.246/images/opendata/efre.png', 'http://www.berlin.de/sen/wirtschaft/gruenden-und-foerdern/europaeische-strukturfonds/'));
+viewer.scene.frameState.creditDisplay.addDefaultCredit(new Cesium.Credit('EU', 'http://81.169.167.246/images/opendata/EU_efre_weiss.png', 'http://www.berlin.de/sen/wirtschaft/gruenden-und-foerdern/europaeische-strukturfonds/'));
+viewer.scene.frameState.creditDisplay.addDefaultCredit(new Cesium.Credit('Im Auftrag der Senatsverwaltung für Wirtschaft, Technologie und Forschung, gefördert aus dem Europäischen Fonds für Regionale Entwicklung (EFRE).'));
 
 	
+
 function getParameterByName(name) {
     name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
     var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
         results = regex.exec(location.search);
     return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 }
+
 var maxLevel = parseInt(getParameterByName("maxLevel"));
 var maxModels = parseInt(getParameterByName("maxModels"));
+
 if(isNaN(maxLevel)){
 	maxLevel = 16;
 }
 console.log("Set MaxLevel to " + maxLevel);
 if(isNaN(maxModels)){
-	maxModels = 2000;
+	maxModels = 500;
 }
 console.log("Set MaxModels to " + maxModels);
+
 loadingIndicator.style.display = 'none';
 </script>
 </html>
