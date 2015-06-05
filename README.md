@@ -31,10 +31,11 @@ The javascript code loads 3D-Objects depending on the camera view in the cesium-
 The 3D-Objects can be generated using the following toolchain. 
 
 [Importer-Exporter](https://github.com/virtualcitySYSTEMS/importer-exporter) to export collada files and a json tile structure
+
 [colladaToBglTFConverter](https://github.com/virtualcitySYSTEMS/colladaToBglTFConverter) to convert the collada files to bglTF
 
-See http://hosting.virtualcitysystems.de/demos/berlin/cesium/ for a application which uses this code. 
-Berlin Building-Models from http://www.businesslocationcenter.de/downloadportal.
+See http://hosting.virtualcitysystems.de/demos/berlin/cesium/ for an application based on this code. 
+Berlin building-models from http://www.businesslocationcenter.de/downloadportal.
 
 
 3. How To
