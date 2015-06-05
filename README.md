@@ -9,10 +9,10 @@ cesium3DObjectStreaming is a small javascript to stream 3D-Objects to a [cesium]
 
 1. License
 2. About
-4. How To
-5. Developers
-6. Contact
-7. Disclaimer
+3. How To
+4. Developers
+5. Contact
+6. Disclaimer
 
 
 1. License
