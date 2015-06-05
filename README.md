@@ -1,7 +1,7 @@
 # cesium3DObjectStreaming
 =====
 
-cesium3DObjectStreaming is a small javascript to stream 3D-Objects to a [cesium](http://cesiumjs.org/)
+cesium3DObjectStreaming is a small javascript to stream 3D-Objects to a [cesium](http://cesiumjs.org/) globe.
 
 
 0. Index
